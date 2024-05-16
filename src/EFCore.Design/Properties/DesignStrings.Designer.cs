@@ -102,6 +102,12 @@ namespace Microsoft.EntityFrameworkCore.Internal
             => GetString("CircularBaseClassDependency");
 
         /// <summary>
+        ///     Compilation failed with errors:
+        /// </summary>
+        public static string CompilationErrors
+            => GetString("CompilationErrors");
+
+        /// <summary>
         ///     A compilation must be loaded.
         /// </summary>
         public static string CompilationMustBeLoaded
@@ -462,6 +468,12 @@ namespace Microsoft.EntityFrameworkCore.Internal
                 name);
 
         /// <summary>
+        ///     Could not find symbol for anonymous object creation initializer:
+        /// </summary>
+        public static string NoAnonymousSymbol
+            => GetString("NoAnonymousSymbol");
+
+        /// <summary>
         ///     Don't colorize output.
         /// </summary>
         public static string NoColorDescription
@@ -628,6 +640,12 @@ namespace Microsoft.EntityFrameworkCore.Internal
             => GetString("QueryComprehensionSyntaxNotSupportedInPrecompiledQueries");
 
         /// <summary>
+        ///     Query precompilation failed with errors:
+        /// </summary>
+        public static string QueryPrecompilationErrors
+            => GetString("QueryPrecompilationErrors");
+
+        /// <summary>
         ///     No files were generated in directory '{outputDirectoryName}'. The following file(s) already exist(s) and must be made writeable to continue: {readOnlyFiles}.
         /// </summary>
         public static string ReadOnlyFiles(object? outputDirectoryName, object? readOnlyFiles)
@@ -714,6 +732,14 @@ namespace Microsoft.EntityFrameworkCore.Internal
             => string.Format(
                 GetString("UnableToScaffoldIndexMissingProperty", nameof(indexName), nameof(columnNames)),
                 indexName, columnNames);
+
+        /// <summary>
+        ///     The project '{project}' does not support compilation.
+        /// </summary>
+        public static string UncompilableProject(object? project)
+            => string.Format(
+                GetString("UncompilableProject", nameof(project)),
+                project);
 
         /// <summary>
         ///     Unhandled enum value '{enumValue}'.
