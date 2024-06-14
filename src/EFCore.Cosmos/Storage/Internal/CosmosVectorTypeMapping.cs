@@ -1,10 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
+using Microsoft.EntityFrameworkCore.Cosmos.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Storage.Json;
+using Newtonsoft.Json.Linq;
 
-// ReSharper disable once CheckNamespace
-namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
+namespace Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
 
 /// <summary>
 ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -12,12 +13,7 @@ namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 ///     any release. You should only use it directly in your code with extreme caution and knowing that
 ///     doing so can result in application failures when updating to a new Entity Framework Core release.
 /// </summary>
-public class SqlFunctionExpression(
-        string name,
-        IEnumerable<SqlExpression> arguments,
-        Type type,
-        CosmosTypeMapping? typeMapping)
-    : SqlExpression(type, typeMapping)
+public class CosmosVectorTypeMapping : CosmosTypeMapping
 {
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -25,7 +21,8 @@ public class SqlFunctionExpression(
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    public virtual string Name { get; } = name;
+    public static new CosmosVectorTypeMapping Default { get; }
+        = new(typeof(byte[]), new CosmosVectorType(DistanceFunction.Cosine, 0, VectorDataType.Int8));
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -33,31 +30,23 @@ public class SqlFunctionExpression(
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    public virtual IReadOnlyList<SqlExpression> Arguments { get; } = arguments.ToList();
-
-    /// <summary>
-    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-    ///     any release. You should only use it directly in your code with extreme caution and knowing that
-    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-    /// </summary>
-    protected override Expression VisitChildren(ExpressionVisitor visitor)
+    public CosmosVectorTypeMapping(
+        Type clrType,
+        CosmosVectorType vectorType,
+        ValueComparer? comparer = null,
+        ValueComparer? keyComparer = null,
+        CoreTypeMapping? elementMapping = null,
+        JsonValueReaderWriter? jsonValueReaderWriter = null)
+        : this(
+            new CoreTypeMappingParameters(
+                clrType,
+                converter: null,
+                comparer,
+                keyComparer,
+                elementMapping: elementMapping,
+                jsonValueReaderWriter: jsonValueReaderWriter),
+            vectorType)
     {
-        var changed = false;
-        var arguments = new SqlExpression[Arguments.Count];
-        for (var i = 0; i < arguments.Length; i++)
-        {
-            arguments[i] = (SqlExpression)visitor.Visit(Arguments[i]);
-            changed |= arguments[i] != Arguments[i];
-        }
-
-        return changed
-            ? new SqlFunctionExpression(
-                Name,
-                arguments,
-                Type,
-                TypeMapping)
-            : this;
     }
 
     /// <summary>
@@ -66,32 +55,17 @@ public class SqlFunctionExpression(
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    public virtual SqlFunctionExpression ApplyTypeMapping(CosmosTypeMapping? typeMapping)
-        => new(Name, Arguments, Type, typeMapping ?? TypeMapping);
-
-    /// <summary>
-    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-    ///     any release. You should only use it directly in your code with extreme caution and knowing that
-    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-    /// </summary>
-    public virtual SqlFunctionExpression Update(IReadOnlyList<SqlExpression> arguments)
-        => !arguments.SequenceEqual(Arguments)
-            ? new SqlFunctionExpression(Name, arguments, Type, TypeMapping)
-            : this;
-
-    /// <summary>
-    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-    ///     any release. You should only use it directly in your code with extreme caution and knowing that
-    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-    /// </summary>
-    protected override void Print(ExpressionPrinter expressionPrinter)
+    public CosmosVectorTypeMapping(CosmosTypeMapping mapping, CosmosVectorType vectorType)
+        : this(
+            new CoreTypeMappingParameters(
+                mapping.ClrType,
+                converter: mapping.Converter,
+                mapping.Comparer,
+                mapping.KeyComparer,
+                elementMapping: mapping.ElementTypeMapping,
+                jsonValueReaderWriter: mapping.JsonValueReaderWriter),
+            vectorType)
     {
-        expressionPrinter.Append(Name);
-        expressionPrinter.Append("(");
-        expressionPrinter.VisitCollection(Arguments);
-        expressionPrinter.Append(")");
     }
 
     /// <summary>
@@ -100,16 +74,11 @@ public class SqlFunctionExpression(
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    public override bool Equals(object? obj)
-        => obj != null
-            && (ReferenceEquals(this, obj)
-                || obj is SqlFunctionExpression sqlFunctionExpression
-                && Equals(sqlFunctionExpression));
-
-    private bool Equals(SqlFunctionExpression sqlFunctionExpression)
-        => base.Equals(sqlFunctionExpression)
-            && Name == sqlFunctionExpression.Name
-            && Arguments.SequenceEqual(sqlFunctionExpression.Arguments);
+    protected CosmosVectorTypeMapping(CoreTypeMappingParameters parameters, CosmosVectorType vectorType)
+        : base(parameters)
+    {
+        VectorType = vectorType;
+    }
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -117,16 +86,41 @@ public class SqlFunctionExpression(
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    public override int GetHashCode()
-    {
-        var hash = new HashCode();
-        hash.Add(base.GetHashCode());
-        hash.Add(Name);
-        for (var i = 0; i < Arguments.Count; i++)
-        {
-            hash.Add(Arguments[i]);
-        }
+    public virtual CosmosVectorType VectorType { get; }
 
-        return hash.ToHashCode();
-    }
+    /// <summary>
+    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+    /// </summary>
+    public override CoreTypeMapping WithComposedConverter(
+        ValueConverter? converter,
+        ValueComparer? comparer = null,
+        ValueComparer? keyComparer = null,
+        CoreTypeMapping? elementMapping = null,
+        JsonValueReaderWriter? jsonValueReaderWriter = null)
+        => new CosmosVectorTypeMapping(
+            Parameters.WithComposedConverter(converter, comparer, keyComparer, elementMapping, jsonValueReaderWriter),
+            VectorType);
+
+    /// <summary>
+    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+    /// </summary>
+    protected override CoreTypeMapping Clone(CoreTypeMappingParameters parameters)
+        => new CosmosVectorTypeMapping(parameters, VectorType);
+
+    /// <summary>
+    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
+    /// </summary>
+    public override JToken? GenerateJToken(object? value)
+        => value == null
+            ? null
+            : (value as JToken) ?? JToken.FromObject(value, CosmosClientWrapper.Serializer);
 }

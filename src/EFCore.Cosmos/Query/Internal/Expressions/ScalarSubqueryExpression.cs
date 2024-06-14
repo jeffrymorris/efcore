@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
+
 // ReSharper disable once CheckNamespace
 namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 
@@ -35,7 +37,7 @@ public class ScalarSubqueryExpression : SqlExpression
         Subquery = subquery;
     }
 
-    private ScalarSubqueryExpression(SelectExpression subquery, CoreTypeMapping? typeMapping)
+    private ScalarSubqueryExpression(SelectExpression subquery, CosmosTypeMapping? typeMapping)
         : base(subquery.Projection[0].Type, typeMapping)
     {
         Subquery = subquery;
@@ -57,7 +59,7 @@ public class ScalarSubqueryExpression : SqlExpression
     /// </summary>
     /// <param name="typeMapping">A relational type mapping to apply.</param>
     /// <returns>A new expression which has supplied type mapping.</returns>
-    public virtual SqlExpression ApplyTypeMapping(CoreTypeMapping? typeMapping)
+    public virtual SqlExpression ApplyTypeMapping(CosmosTypeMapping? typeMapping)
         => new ScalarSubqueryExpression(Subquery, typeMapping);
 
     /// <inheritdoc />

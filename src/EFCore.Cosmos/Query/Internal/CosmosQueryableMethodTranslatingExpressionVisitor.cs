@@ -3,6 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Cosmos.Internal;
+using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
 
 namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 
@@ -1376,7 +1377,7 @@ public class CosmosQueryableMethodTranslatingExpressionVisitor : QueryableMethod
             && WrapPrimitiveCollectionAsShapedQuery(
                 sqlExpression,
                 sqlExpression.Type.GetSequenceType(),
-                sqlExpression.TypeMapping!.ElementTypeMapping!) is { } primitiveCollectionTranslation)
+                (CosmosTypeMapping?)sqlExpression.TypeMapping!.ElementTypeMapping!) is { } primitiveCollectionTranslation)
         {
             return primitiveCollectionTranslation;
         }
@@ -1412,8 +1413,8 @@ public class CosmosQueryableMethodTranslatingExpressionVisitor : QueryableMethod
         // TODO: The following currently just gets the type mapping from the CLR type, which ignores e.g. value converters on
         // TODO: properties compared against
         var elementClrType = inlineQueryRootExpression.ElementType;
-        var elementTypeMapping = _typeMappingSource.FindMapping(elementClrType)!;
-        var arrayTypeMapping = _typeMappingSource.FindMapping(elementClrType.MakeArrayType()); // TODO: IEnumerable?
+        var elementTypeMapping = (CosmosTypeMapping?)_typeMappingSource.FindMapping(elementClrType)!;
+        var arrayTypeMapping = (CosmosTypeMapping?)_typeMappingSource.FindMapping(elementClrType.MakeArrayType()); // TODO: IEnumerable?
         var inlineArray = new ArrayConstantExpression(elementClrType, translatedItems, arrayTypeMapping);
 
         // Unfortunately, Cosmos doesn't support selecting directly from an inline array: SELECT i FROM i IN [1,2,3] (syntax error)
@@ -1448,8 +1449,8 @@ public class CosmosQueryableMethodTranslatingExpressionVisitor : QueryableMethod
         // TODO: The following currently just gets the type mapping from the CLR type, which ignores e.g. value converters on
         // TODO: properties compared against
         var elementClrType = parameterQueryRootExpression.ElementType;
-        var arrayTypeMapping = _typeMappingSource.FindMapping(elementClrType.MakeArrayType()); // TODO: IEnumerable?
-        var elementTypeMapping = _typeMappingSource.FindMapping(elementClrType)!;
+        var arrayTypeMapping = (CosmosTypeMapping?)_typeMappingSource.FindMapping(elementClrType.MakeArrayType()); // TODO: IEnumerable?
+        var elementTypeMapping = (CosmosTypeMapping?)_typeMappingSource.FindMapping(elementClrType)!;
         var sqlParameterExpression = new SqlParameterExpression(parameterQueryRootExpression.ParameterExpression, arrayTypeMapping);
 
         // Unfortunately, Cosmos doesn't support selecting directly from an inline array: SELECT i FROM i IN [1,2,3] (syntax error)
@@ -1468,7 +1469,7 @@ public class CosmosQueryableMethodTranslatingExpressionVisitor : QueryableMethod
     private ShapedQueryExpression WrapPrimitiveCollectionAsShapedQuery(
         Expression array,
         Type elementClrType,
-        CoreTypeMapping elementTypeMapping)
+        CosmosTypeMapping elementTypeMapping)
     {
         // TODO: Do proper alias management: #33894
         var select = SelectExpression.CreateForPrimitiveCollection(
@@ -1500,7 +1501,7 @@ public class CosmosQueryableMethodTranslatingExpressionVisitor : QueryableMethod
         if (CosmosQueryUtils.TryConvertToArray(source1, _typeMappingSource, out var array1, out var projection1, ignoreOrderings)
             && CosmosQueryUtils.TryConvertToArray(source2, _typeMappingSource, out var array2, out var projection2, ignoreOrderings)
             && projection1.Type == projection2.Type
-            && (projection1.TypeMapping ?? projection2.TypeMapping) is CoreTypeMapping typeMapping)
+            && (projection1.TypeMapping ?? projection2.TypeMapping) is { } typeMapping)
         {
             var translation = _sqlExpressionFactory.Function(functionName, [array1, array2], projection1.Type, typeMapping);
             var select = SelectExpression.CreateForPrimitiveCollection(

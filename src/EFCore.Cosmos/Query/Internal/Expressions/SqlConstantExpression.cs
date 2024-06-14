@@ -15,7 +15,7 @@ namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 ///     any release. You should only use it directly in your code with extreme caution and knowing that
 ///     doing so can result in application failures when updating to a new Entity Framework Core release.
 /// </summary>
-public class SqlConstantExpression(ConstantExpression constantExpression, CoreTypeMapping? typeMapping)
+public class SqlConstantExpression(ConstantExpression constantExpression, CosmosTypeMapping? typeMapping)
     : SqlExpression(constantExpression.Type, typeMapping)
 {
     /// <summary>
@@ -33,7 +33,7 @@ public class SqlConstantExpression(ConstantExpression constantExpression, CoreTy
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    public virtual SqlExpression ApplyTypeMapping(CoreTypeMapping? typeMapping)
+    public virtual SqlExpression ApplyTypeMapping(CosmosTypeMapping? typeMapping)
         => new SqlConstantExpression(constantExpression, typeMapping ?? TypeMapping);
 
     /// <summary>
@@ -80,7 +80,7 @@ public class SqlConstantExpression(ConstantExpression constantExpression, CoreTy
         }
     }
 
-    private JToken? GenerateJToken(object? value, CoreTypeMapping? typeMapping)
+    private JToken? GenerateJToken(object? value, CosmosTypeMapping? typeMapping)
     {
         var mappingClrType = typeMapping?.ClrType.UnwrapNullableType() ?? Type;
         if (value?.GetType().IsInteger() == true

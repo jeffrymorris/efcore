@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 // ReSharper disable once CheckNamespace
+
+using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
+
 namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 
 /// <summary>
@@ -15,7 +18,7 @@ namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 ///     doing so can result in application failures when updating to a new Entity Framework Core release.
 /// </remarks>
 [DebuggerDisplay("{Microsoft.EntityFrameworkCore.Query.ExpressionPrinter.Print(this), nq}")]
-public class ArrayConstantExpression(Type elementClrType, IReadOnlyList<SqlExpression> items, CoreTypeMapping? typeMapping = null)
+public class ArrayConstantExpression(Type elementClrType, IReadOnlyList<SqlExpression> items, CosmosTypeMapping? typeMapping = null)
     : SqlExpression(typeof(IEnumerable<>).MakeGenericType(elementClrType), typeMapping)
 {
     /// <summary>

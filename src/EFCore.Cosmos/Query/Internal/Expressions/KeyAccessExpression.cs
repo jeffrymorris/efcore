@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
+
 // ReSharper disable once CheckNamespace
 namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 
@@ -11,7 +13,7 @@ namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 ///     doing so can result in application failures when updating to a new Entity Framework Core release.
 /// </summary>
 public class KeyAccessExpression(IProperty property, Expression accessExpression)
-    : SqlExpression(property.ClrType, property.GetTypeMapping()), IAccessExpression
+    : SqlExpression(property.ClrType, (CosmosTypeMapping)property.GetTypeMapping()), IAccessExpression
 {
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to

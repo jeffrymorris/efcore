@@ -32,10 +32,26 @@ namespace Microsoft.EntityFrameworkCore.Cosmos.Internal
                 ttl1, entityType1, entityType2, ttl2, container);
 
         /// <summary>
+        ///     The '{parameter}' value passed to '{methodName}' must be a constant.
+        /// </summary>
+        public static string ArgumentNotConstant(object? parameter, object? methodName)
+            => string.Format(
+                GetString("ArgumentNotConstant", nameof(parameter), nameof(methodName)),
+                parameter, methodName);
+
+        /// <summary>
         ///     The Cosmos database does not support 'CanConnect' or 'CanConnectAsync'.
         /// </summary>
         public static string CanConnectNotSupported
             => GetString("CanConnectNotSupported");
+
+        /// <summary>
+        ///     A vector index on '{entityType}' is defined over properties `{properties}`. A vector index can only target a single property.
+        /// </summary>
+        public static string CompositeVectorIndex(object? entityType, object? properties)
+            => string.Format(
+                GetString("CompositeVectorIndex", nameof(entityType), nameof(properties)),
+                entityType, properties);
 
         /// <summary>
         ///     None of connection string, CredentialToken, account key or account endpoint were specified. Specify a set of connection details.
@@ -402,6 +418,21 @@ namespace Microsoft.EntityFrameworkCore.Cosmos.Internal
             => string.Format(
                 GetString("UpdateStoreException", nameof(itemId)),
                 itemId);
+
+        /// <summary>
+        ///     A vector index is defined for `{entityType}.{property}`, but this property has not been configured as a vector. Use 'IsVector()' in 'OnModelCreating' to configure the property as a vector.
+        /// </summary>
+        public static string VectorIndexOnNonVector(object? entityType, object? property)
+            => string.Format(
+                GetString("VectorIndexOnNonVector", nameof(entityType), nameof(property)),
+                entityType, property);
+
+
+        /// <summary>
+        ///     The 'VectorDistance' function can only be used with a property mapped as a vectors. Use 'IsVector()' in 'OnModelCreating' to configure the property as a vector.
+        /// </summary>
+        public static string VectorSearchRequiresVector
+            => GetString("VectorSearchRequiresVector");
 
         /// <summary>
         ///     'VisitChildren' must be overridden in the class deriving from 'SqlExpression'.

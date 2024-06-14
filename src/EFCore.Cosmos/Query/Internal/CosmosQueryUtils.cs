@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
 
 namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 
@@ -55,7 +56,7 @@ public static class CosmosQueryUtils
             var arrayClrType = projection.Type.MakeArrayType();
             // TODO: Temporary hack - need to perform proper derivation of the array type mapping from the element (e.g. for
             // value conversion).
-            var arrayTypeMapping = typeMappingSource.FindMapping(arrayClrType);
+            var arrayTypeMapping = (CosmosTypeMapping?)typeMappingSource.FindMapping(arrayClrType);
 
             array = new ArrayExpression(subquery, arrayClrType, arrayTypeMapping);
             return true;

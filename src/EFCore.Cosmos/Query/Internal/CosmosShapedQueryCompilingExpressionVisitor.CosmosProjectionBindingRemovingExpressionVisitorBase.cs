@@ -653,7 +653,7 @@ public partial class CosmosShapedQueryCompilingExpressionVisitor
                 && !property.IsShadowProperty())
             {
                 var readExpression = CreateGetValueExpression(
-                    jObjectExpression, storeName, type.MakeNullable(), property.GetTypeMapping());
+                    jObjectExpression, storeName, type.MakeNullable(), (CosmosTypeMapping)property.GetTypeMapping());
 
                 var nonNullReadExpression = readExpression;
                 if (nonNullReadExpression.Type != type)
@@ -674,7 +674,7 @@ public partial class CosmosShapedQueryCompilingExpressionVisitor
             }
 
             return Convert(
-                CreateGetValueExpression(jObjectExpression, storeName, type.MakeNullable(), property.GetTypeMapping()),
+                CreateGetValueExpression(jObjectExpression, storeName, type.MakeNullable(), (CosmosTypeMapping)property.GetTypeMapping()),
                 type);
         }
 
@@ -682,7 +682,7 @@ public partial class CosmosShapedQueryCompilingExpressionVisitor
             Expression jObjectExpression,
             string storeName,
             Type type,
-            CoreTypeMapping typeMapping = null)
+            CosmosTypeMapping typeMapping = null)
         {
             Check.DebugAssert(type.IsNullableType(), "Must read nullable type from JObject.");
 

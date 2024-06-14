@@ -352,9 +352,9 @@ public class CosmosQuerySqlGenerator(ITypeMappingSource typeMappingSource) : Sql
                 for (var i = 0; i < constantValues.Length; i++)
                 {
                     var value = constantValues[i];
-                    var typeMapping = typeMappingSource.FindMapping(value.GetType());
+                    var typeMapping = (CosmosTypeMapping?)typeMappingSource.FindMapping(value.GetType());
                     Check.DebugAssert(typeMapping is not null, "Could not find type mapping for FromSql parameter");
-                    substitutions[i] = GenerateConstant(value, typeMapping);
+                    substitutions[i] = typeMapping.GenerateConstant(value);
                 }
 
                 break;
@@ -540,39 +540,9 @@ public class CosmosQuerySqlGenerator(ITypeMappingSource typeMappingSource) : Sql
     protected override Expression VisitSqlConstant(SqlConstantExpression sqlConstantExpression)
     {
         Check.DebugAssert(sqlConstantExpression.TypeMapping is not null, "SqlConstantExpression without a type mapping");
-        _sqlBuilder.Append(GenerateConstant(sqlConstantExpression.Value, sqlConstantExpression.TypeMapping));
+        _sqlBuilder.Append(sqlConstantExpression.TypeMapping.GenerateConstant(sqlConstantExpression.Value));
 
         return sqlConstantExpression;
-    }
-
-    private static string GenerateConstant(object? value, CoreTypeMapping typeMapping)
-    {
-        var jToken = GenerateJToken(value, typeMapping);
-
-        return jToken is null ? "null" : jToken.ToString(Formatting.None);
-    }
-
-    private static JToken? GenerateJToken(object? value, CoreTypeMapping typeMapping)
-    {
-        if (value?.GetType().IsInteger() == true)
-        {
-            var unwrappedType = typeMapping.ClrType.UnwrapNullableType();
-            value = unwrappedType.IsEnum
-                ? Enum.ToObject(unwrappedType, value)
-                : unwrappedType == typeof(char)
-                    ? Convert.ChangeType(value, unwrappedType)
-                    : value;
-        }
-
-        var converter = typeMapping.Converter;
-        if (converter != null)
-        {
-            value = converter.ConvertToProvider(value);
-        }
-
-        return value == null
-            ? null
-            : (value as JToken) ?? JToken.FromObject(value, CosmosClientWrapper.Serializer);
     }
 
     /// <summary>
@@ -607,7 +577,7 @@ public class CosmosQuerySqlGenerator(ITypeMappingSource typeMappingSource) : Sql
         if (_sqlParameters.All(sp => sp.Name != parameterName))
         {
             Check.DebugAssert(sqlParameterExpression.TypeMapping is not null, "SqlParameterExpression without a type mapping");
-            var jToken = GenerateJToken(_parameterValues[sqlParameterExpression.Name], sqlParameterExpression.TypeMapping);
+            var jToken = sqlParameterExpression.TypeMapping.GenerateJToken(_parameterValues[sqlParameterExpression.Name]);
             _sqlParameters.Add(new SqlParameter(parameterName, jToken));
         }
 

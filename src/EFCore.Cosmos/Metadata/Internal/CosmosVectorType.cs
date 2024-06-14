@@ -1,9 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
-
-namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
+namespace Microsoft.EntityFrameworkCore.Cosmos.Metadata.Internal;
 
 /// <summary>
 ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -11,7 +9,7 @@ namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 ///     any release. You should only use it directly in your code with extreme caution and knowing that
 ///     doing so can result in application failures when updating to a new Entity Framework Core release.
 /// </summary>
-public static class ExpressionExtensions
+public sealed record class CosmosVectorType(DistanceFunction DistanceFunction, ulong Dimensions, VectorDataType? DataType)
 {
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -19,16 +17,15 @@ public static class ExpressionExtensions
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    public static CosmosTypeMapping? InferTypeMapping(params Expression[] expressions)
+    public static VectorDataType CreateDefaultVectorDataType(Type clrType)
     {
-        for (var i = 0; i < expressions.Length; i++)
-        {
-            if (expressions[i] is SqlExpression { TypeMapping: not null } sql)
-            {
-                return sql.TypeMapping;
-            }
-        }
-
-        return null;
+        var elementType = clrType.TryGetElementType(typeof(IEnumerable<>))?.UnwrapNullableType();
+        return elementType == typeof(sbyte)
+            ? VectorDataType.Int8
+            : elementType == typeof(byte)
+                ? VectorDataType.Uint8
+                : elementType == typeof(Half)
+                    ? VectorDataType.Float16
+                    : VectorDataType.Float32;
     }
 }

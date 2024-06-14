@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
 
 namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 
@@ -20,7 +21,7 @@ public interface ISqlExpressionFactory
     ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
     [return: NotNullIfNotNull(nameof(sqlExpression))]
-    SqlExpression? ApplyTypeMapping(SqlExpression? sqlExpression, CoreTypeMapping? typeMapping);
+    SqlExpression? ApplyTypeMapping(SqlExpression? sqlExpression, CosmosTypeMapping? typeMapping);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -49,7 +50,7 @@ public interface ISqlExpressionFactory
         ExpressionType operatorType,
         SqlExpression left,
         SqlExpression right,
-        CoreTypeMapping? typeMapping);
+        CosmosTypeMapping? typeMapping);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -131,7 +132,7 @@ public interface ISqlExpressionFactory
     SqlBinaryExpression Add(
         SqlExpression left,
         SqlExpression right,
-        CoreTypeMapping? typeMapping = null);
+        CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -142,7 +143,7 @@ public interface ISqlExpressionFactory
     SqlBinaryExpression Subtract(
         SqlExpression left,
         SqlExpression right,
-        CoreTypeMapping? typeMapping = null);
+        CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -153,7 +154,7 @@ public interface ISqlExpressionFactory
     SqlBinaryExpression Multiply(
         SqlExpression left,
         SqlExpression right,
-        CoreTypeMapping? typeMapping = null);
+        CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -164,7 +165,7 @@ public interface ISqlExpressionFactory
     SqlBinaryExpression Divide(
         SqlExpression left,
         SqlExpression right,
-        CoreTypeMapping? typeMapping = null);
+        CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -175,7 +176,7 @@ public interface ISqlExpressionFactory
     SqlBinaryExpression Modulo(
         SqlExpression left,
         SqlExpression right,
-        CoreTypeMapping? typeMapping = null);
+        CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -186,7 +187,7 @@ public interface ISqlExpressionFactory
     SqlBinaryExpression And(
         SqlExpression left,
         SqlExpression right,
-        CoreTypeMapping? typeMapping = null);
+        CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -197,7 +198,7 @@ public interface ISqlExpressionFactory
     SqlBinaryExpression Or(
         SqlExpression left,
         SqlExpression right,
-        CoreTypeMapping? typeMapping = null);
+        CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -205,7 +206,7 @@ public interface ISqlExpressionFactory
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    SqlExpression CoalesceUndefined(SqlExpression left, SqlExpression right, CoreTypeMapping? typeMapping = null);
+    SqlExpression CoalesceUndefined(SqlExpression left, SqlExpression right, CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -229,7 +230,7 @@ public interface ISqlExpressionFactory
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    SqlBinaryExpression ArrayIndex(SqlExpression left, SqlExpression right, Type type, CoreTypeMapping? typeMapping = null);
+    SqlBinaryExpression ArrayIndex(SqlExpression left, SqlExpression right, Type type, CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -240,7 +241,7 @@ public interface ISqlExpressionFactory
     SqlUnaryExpression Convert(
         SqlExpression operand,
         Type type,
-        CoreTypeMapping? typeMapping = null);
+        CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -268,7 +269,7 @@ public interface ISqlExpressionFactory
         string functionName,
         IEnumerable<SqlExpression> arguments,
         Type returnType,
-        CoreTypeMapping? typeMapping = null);
+        CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
@@ -303,7 +304,7 @@ public interface ISqlExpressionFactory
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new Entity Framework Core release.
     /// </summary>
-    SqlConstantExpression Constant(object? value, CoreTypeMapping? typeMapping = null);
+    SqlConstantExpression Constant(object? value, CosmosTypeMapping? typeMapping = null);
 
     /// <summary>
     ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to

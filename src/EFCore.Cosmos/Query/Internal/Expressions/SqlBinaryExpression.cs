@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.EntityFrameworkCore.Cosmos.Internal;
+using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
@@ -25,7 +26,7 @@ public class SqlBinaryExpression : SqlExpression
         SqlExpression left,
         SqlExpression right,
         Type type,
-        CoreTypeMapping? typeMapping)
+        CosmosTypeMapping? typeMapping)
         : base(type, typeMapping)
     {
         if (!IsValidOperator(operatorType))

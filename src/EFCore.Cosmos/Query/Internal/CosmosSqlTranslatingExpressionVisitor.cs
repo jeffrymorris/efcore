@@ -4,6 +4,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Cosmos.Internal;
+using Microsoft.EntityFrameworkCore.Cosmos.Storage.Internal;
 
 namespace Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
 
@@ -770,7 +771,7 @@ public class CosmosSqlTranslatingExpressionVisitor(
             translatedItems[i] = translatedItem;
         }
 
-        var arrayTypeMapping = typeMappingSource.FindMapping(newArrayExpression.Type);
+        var arrayTypeMapping = (CosmosTypeMapping?)typeMappingSource.FindMapping(newArrayExpression.Type);
         var elementClrType = newArrayExpression.Type.GetElementType()!;
         var inlineArray = new ArrayConstantExpression(elementClrType, translatedItems, arrayTypeMapping);
 
